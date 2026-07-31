@@ -1,0 +1,13 @@
+{
+  "name": "gabriela-personalizados",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Site da GG Gabriela Garcia Personalizados com painel de administração publicável.",
+  "scripts": {
+    "dev": "node dev-server.js"
+  },
+  "dependencies": {
+    "@vercel/blob": "^0.27.3"
+  }
+}

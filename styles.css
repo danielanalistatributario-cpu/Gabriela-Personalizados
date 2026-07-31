@@ -2008,6 +2008,20 @@ body.admin-active {
   border: 1px solid #ffe082;
 }
 
+.alert-ok {
+  background: #e8f5e9;
+  color: #1b5e20;
+  border: 1px solid #a5d6a7;
+}
+
+/* Aviso em andamento: ganha um ponto pulsante no lugar do ícone verde */
+.toast.is-busy i { color: #fbbf24; animation: toast-pulse 1s ease-in-out infinite; }
+
+@keyframes toast-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
 .storage-meter { margin-bottom: 22px; }
 
 .storage-meter-label {

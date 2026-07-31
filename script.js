@@ -4,183 +4,39 @@
 
 const WHATSAPP_NUMBER = '5591982047600';
 
-// Dados Padrão Iniciais
-const DEFAULT_CATEGORIES = [
-  { id: 'diadospais', name: 'Dia dos Pais', icon: 'heart-handshake', desc: 'Caixas de bombons com camisa de time, bonés e relógios.' },
-  { id: 'canecas', name: 'Canecas & Xícaras', icon: 'coffee', desc: 'Mágicas, alça coração, com fotos e memes Flork.' },
-  { id: 'azulejos', name: 'Azulejos & Relógios', icon: 'image', desc: 'Porcelanas 20x20, azulejos com relógio e Spotify Code.' },
-  { id: 'garrafas', name: 'Squeezes & Garrafas', icon: 'droplet', desc: 'Alumínio com tampa dupla, estampas duráveis.' },
-  { id: 'chaveiros', name: 'Chaveiros & Imãs', icon: 'key', desc: 'Chaveiros de alta resolução e imãs 5x5 para fotos.' },
-  { id: 'brindes', name: 'Brindes & Outros', icon: 'gift', desc: 'Lembrancinhas para festas, eventos e datas especiais.' }
-];
+/* O conteúdo do site (categorias, produtos, ofertas e campanha) fica no
+   servidor, não mais no navegador. Esta página conversa com a API:
 
-const DEFAULT_PRODUCTS = [
-  {
-    id: 'p1',
-    category: 'canecas',
-    title: 'Xícaras Mágicas (Alça Coração)',
-    description: 'Revela a imagem ou frase quando aquecida com café ou chá quente! Incluso arte personalizada, xícara cerâmica premium e embalagem de presente.',
-    originalPrice: 55.00,
-    promoPrice: 47.00,
-    images: ['./6ab20412-d3f5-4cee-9a89-a68b250e496b.jpg']
-  },
-  {
-    id: 'p2',
-    category: 'canecas',
-    title: 'Xícaras Alça de Coração',
-    description: 'Modelo romântico e delicado para casais, mensagens afetivas, Snoopy ou personagens. Incluso arte e embalagem especial.',
-    originalPrice: 50.00,
-    promoPrice: 45.00,
-    images: ['./9e70fce0-fab3-4a56-b9bd-7afc02a7fce6.jpg']
-  },
-  {
-    id: 'p3',
-    category: 'canecas',
-    title: 'Xícaras Simples Personalizadas',
-    description: 'Estampas com fotos estilo Polaroid, 12 motivos para amar você, mensagens de carinho. Incluso arte e embalagem de presente.',
-    originalPrice: 40.00,
-    promoPrice: 35.00,
-    images: ['./eaa8ee4a-aaa3-4b8b-b562-9c7d9c4923d2.jpg']
-  },
-  {
-    id: 'p4',
-    category: 'canecas',
-    title: 'Coleção Canecas Divertidas & Flork',
-    description: 'Canecas bem-humoradas com boneco Flork, calendário de namoro, frases hilárias de amizade e profissões.',
-    originalPrice: 42.00,
-    promoPrice: 35.00,
-    images: ['./3c124ba4-7b75-4acf-9676-4c582696b573.jpg']
-  },
-  {
-    id: 'p5',
-    category: 'canecas',
-    title: 'Canecas com Iniciais & Florais',
-    description: 'Estampas delicadas com monogramas florais, inicial do seu nome, frases para Mães, Filhas e Madrinhas.',
-    originalPrice: 45.00,
-    promoPrice: 35.00,
-    images: ['./877f987d-483a-48b5-bcd5-ae1cf92ffe30.jpg']
-  },
-  {
-    id: 'p6',
-    category: 'azulejos',
-    title: 'Azulejo Personalizado 20x20',
-    description: 'Impressão fotográfica de alta durabilidade em porcelana cerâmica. Acompanha suporte de mesa elegante e embalagem de presente!',
-    originalPrice: 48.00,
-    promoPrice: 40.00,
-    images: ['./183c3b84-85f3-414c-a912-3a2e56884c17.jpg']
-  },
-  {
-    id: 'p7',
-    category: 'azulejos',
-    title: 'Azulejo Spotify & Mosaico de Fotos',
-    description: 'Azulejos decorativos com código interativo do Spotify (sua música favorita), calendário com datas especiais e mosaicos de fotos de família.',
-    originalPrice: 50.00,
-    promoPrice: 40.00,
-    images: ['./7ebd8191-462d-4b2b-a44b-612eb12cac98.jpg']
-  },
-  {
-    id: 'p8',
-    category: 'azulejos',
-    title: 'Azulejo Relógio Funcional 20x20',
-    description: 'Relógio de mesa funcional em azulejo cerâmico com máquina contínua silenciosa. Acompanha suporte de mesa, arte e embalagem.',
-    originalPrice: 55.00,
-    promoPrice: 40.00,
-    images: ['./b81e6161-762f-40e4-af6f-2e168682e8b9.jpg']
-  },
-  {
-    id: 'p9',
-    category: 'azulejos',
-    title: 'Relógios de Mesa Afetivos',
-    description: 'Modelos comemorativos para Mãe, Vó, Pai, Casal e Bebês. Presente de altíssima utilidade, elegância e valor emocional.',
-    originalPrice: 50.00,
-    promoPrice: 40.00,
-    images: ['./b750b56e-0cb0-400e-bfee-9e06ef36b0e9.jpg']
-  },
-  {
-    id: 'p10',
-    category: 'garrafas',
-    title: 'Squeeze Alumínio Tampa Dupla',
-    description: 'Garrafas de alumínio 500ml/600ml duráveis com tampa dupla de segurança. Personalize com seu nome, super-heróis ou florais.',
-    originalPrice: 55.00,
-    promoPrice: 45.00,
-    images: ['./b589c2a3-d000-42fc-a963-c776cd758268.jpg']
-  },
-  {
-    id: 'p11',
-    category: 'chaveiros',
-    title: 'Chaveiros Sublimados',
-    description: 'Chaveiros com fotos de alta resolução, frases de carinho (Dinda, Mamãe) e artes exclusivas. Lembrança acessível e marcante.',
-    originalPrice: 8.00,
-    promoPrice: 5.00,
-    images: ['./b2ef4f25-f591-40f5-b8bd-c374cbdd6539.jpg']
-  },
-  {
-    id: 'p12',
-    category: 'chaveiros',
-    title: 'Imãs de Geladeira Fotográficos 5x5',
-    description: 'R$ 4,00 a unidade ou Promoção 3 unidades por R$ 10,00! Transforme as fotos do celular em imãs fotográficos brilhantes.',
-    originalPrice: 5.00,
-    promoPrice: 4.00,
-    images: ['./0057f877-d413-4476-9c48-e96f356d0e3f.jpg']
-  }
-];
+     GET  /api/content  -> conteúdo publicado, que todo visitante enxerga
+     PUT  /api/content  -> publica as alterações (exige estar logada)
+     POST /api/upload   -> envia uma foto e devolve o endereço dela
+     POST /api/login    -> troca a senha por um token de 12 horas
 
-const DEFAULT_PROMOS = [
-  {
-    id: 'promo1',
-    title: 'Caixa Bombom + Camisa Corinthians',
-    description: 'Camisa personalizada de time, bombons e foto polaroid com prendedor. "Para o melhor Pai do Mundo!"',
-    originalPrice: 100.00,
-    promoPrice: 85.00,
-    tag: '',
-    images: ['./1c252cc3-73b2-40f5-9c10-cbe7392c274a.jpg']
-  },
-  {
-    id: 'promo2',
-    title: 'Caixa Bombom + Camisa Fluminense',
-    description: 'Arte sob medida com o time do coração dele, foto afetuosa e embalagem decorada de presente.',
-    originalPrice: 100.00,
-    promoPrice: 85.00,
-    tag: '',
-    images: ['./7f6d1b45-8e12-4a0b-a0aa-ae7f90a7bde8.jpg']
-  },
-  {
-    id: 'promo3',
-    title: 'Caixa Bombom + Camisa São Paulo',
-    description: 'Combine o amor pelo futebol e pelo pai em uma lembrança doce, elegante e cheia de carinho.',
-    originalPrice: 100.00,
-    promoPrice: 85.00,
-    tag: '',
-    images: ['./e9ea658e-fc1d-461f-a04c-41ec6b4b6d27.jpg']
-  },
-  {
-    id: 'promo4',
-    title: 'Boné Personalizado "DAD EST 2025"',
-    description: 'Bordado ou estampa de altíssima definição. Estilo moderno e emocionante para novos pais e avós!',
-    originalPrice: 60.00,
-    promoPrice: 49.90,
-    tag: 'Lançamento',
-    images: ['./Boné.jpg']
-  }
-];
+   Se a API estiver fora do ar, a página usa o último conteúdo que viu
+   (guardado no navegador) e, na falta dele, o arquivo dados-iniciais.json.
+   Assim o site nunca aparece vazio para um cliente. */
 
-const DEFAULT_PROMO_SETTINGS = {
-  enabled: true,
-  badge: '👔 Especial Dia dos Pais — Edição Limitada',
-  title: 'Surpreenda o Seu Herói com um Presente Inesquecível',
-  emoji: '👨‍👧‍👦',
-  subtitle: 'Caixas personalizadas do time do coração com bombons Ferrero Rocher + Bonés exclusivos e relógios afetivos. Faça seu pedido antecipado!',
-  countdownEnabled: true,
-  countdownTitle: 'Corra! Encomendas antecipadas com condições especiais encerram em:',
-  deadline: '',
-  ctaText: 'Solicitar Orçamento Personalizado para o Dia dos Pais'
+const API = {
+  conteudo: '/api/content',
+  login: '/api/login',
+  upload: '/api/upload'
 };
 
-const STORAGE_KEYS = {
-  categories: 'gg_categories',
-  products: 'gg_products',
-  promos: 'gg_promos',
-  promoSettings: 'gg_promo_settings'
+const ARQUIVO_INICIAL = './dados-iniciais.json';
+const CACHE_KEY = 'gg_cache_conteudo';
+const TOKEN_KEY = 'gg_token';
+
+// Só define os campos esperados da campanha; os textos vêm do servidor.
+const PROMO_SETTINGS_PADRAO = {
+  enabled: true,
+  badge: '',
+  title: '',
+  emoji: '',
+  subtitle: '',
+  countdownEnabled: true,
+  countdownTitle: '',
+  deadline: '',
+  ctaText: ''
 };
 
 let categories = [];
@@ -202,17 +58,20 @@ let promoImages = [];
 let modalGallery = [];
 let modalGalleryIndex = 0;
 
-const ADMIN_PIN = '1234'; // Senha de acesso do proprietário
+// Situação do servidor, descoberta no carregamento
+let backendOnline = false;
+let backendPublicavel = false;
+let authToken = lerToken();
 
-document.addEventListener('DOMContentLoaded', () => {
-  loadData();
+document.addEventListener('DOMContentLoaded', async () => {
   initMobileMenu();
   initFaqAccordion();
+  await loadData();
   renderApp();
 });
 
 /* --------------------------------------------------------------------------
-   1. GERENCIAMENTO DE DADOS (LOCALSTORAGE)
+   1. CONTEÚDO: LEITURA E PUBLICAÇÃO
    -------------------------------------------------------------------------- */
 
 // Aceita tanto o formato antigo (image: '...') quanto o novo (images: [...])
@@ -230,84 +89,268 @@ function normalizeItem(item) {
   return normalized;
 }
 
-function readStored(key, fallback) {
-  try {
-    const raw = localStorage.getItem(key);
-    if (!raw) return fallback;
-    const parsed = JSON.parse(raw);
-    return parsed ?? fallback;
-  } catch (err) {
-    console.warn(`Não foi possível ler "${key}" do armazenamento local.`, err);
-    return fallback;
-  }
+function conteudoAtual() {
+  return { categories, products, promos, promoSettings };
 }
 
-function loadData() {
-  categories = readStored(STORAGE_KEYS.categories, null) || DEFAULT_CATEGORIES.map(c => ({ ...c }));
-  products = (readStored(STORAGE_KEYS.products, null) || DEFAULT_PRODUCTS).map(normalizeItem);
-  promos = (readStored(STORAGE_KEYS.promos, null) || DEFAULT_PROMOS).map(normalizeItem);
-  promoSettings = { ...DEFAULT_PROMO_SETTINGS, ...(readStored(STORAGE_KEYS.promoSettings, null) || {}) };
+function aplicaConteudo(conteudo) {
+  categories = Array.isArray(conteudo.categories) ? conteudo.categories : [];
+  products = Array.isArray(conteudo.products) ? conteudo.products.map(normalizeItem) : [];
+  promos = Array.isArray(conteudo.promos) ? conteudo.promos.map(normalizeItem) : [];
+  promoSettings = { ...PROMO_SETTINGS_PADRAO, ...(conteudo.promoSettings || {}) };
 
-  // Na primeira visita o contador vale 8 dias a partir de agora.
+  // Sem prazo definido, o contador vale 8 dias a partir de agora.
   if (!promoSettings.deadline) {
-    const target = new Date();
-    target.setDate(target.getDate() + 8);
-    target.setHours(23, 59, 59, 0);
-    promoSettings.deadline = toLocalDatetimeValue(target);
+    const alvo = new Date();
+    alvo.setDate(alvo.getDate() + 8);
+    alvo.setHours(23, 59, 59, 0);
+    promoSettings.deadline = toLocalDatetimeValue(alvo);
   }
 }
 
-function isQuotaError(err) {
-  return err && (
-    err.name === 'QuotaExceededError' ||
-    err.name === 'NS_ERROR_DOM_QUOTA_REACHED' ||
-    err.code === 22
-  );
+function guardaCache(conteudo) {
+  try {
+    localStorage.setItem(CACHE_KEY, JSON.stringify(conteudo));
+  } catch (err) {
+    // Cache cheio não é problema: o servidor continua sendo a fonte da verdade.
+    console.warn('Não foi possível guardar o cache local.', err);
+  }
 }
 
-function saveData() {
-  const snapshot = {
-    [STORAGE_KEYS.categories]: JSON.stringify(categories),
-    [STORAGE_KEYS.products]: JSON.stringify(products),
-    [STORAGE_KEYS.promos]: JSON.stringify(promos),
-    [STORAGE_KEYS.promoSettings]: JSON.stringify(promoSettings)
-  };
+function leCache() {
+  try {
+    const bruto = localStorage.getItem(CACHE_KEY);
+    return bruto ? JSON.parse(bruto) : null;
+  } catch {
+    return null;
+  }
+}
 
-  const previous = {};
-  Object.keys(snapshot).forEach(key => { previous[key] = localStorage.getItem(key); });
+function lerToken() {
+  try {
+    return sessionStorage.getItem(TOKEN_KEY) || '';
+  } catch {
+    return '';
+  }
+}
+
+function guardaToken(token) {
+  authToken = token;
+  try {
+    sessionStorage.setItem(TOKEN_KEY, token);
+  } catch (err) {
+    console.warn('Não foi possível guardar a sessão.', err);
+  }
+}
+
+function limpaToken() {
+  authToken = '';
+  try {
+    sessionStorage.removeItem(TOKEN_KEY);
+  } catch {
+    /* nada a fazer */
+  }
+}
+
+async function buscaConteudoInicial() {
+  const resposta = await fetch(ARQUIVO_INICIAL, { cache: 'no-store' });
+  if (!resposta.ok) throw new Error(`Falha ao ler o conteúdo inicial (${resposta.status}).`);
+  return resposta.json();
+}
+
+async function loadData() {
+  let conteudo = null;
 
   try {
-    Object.entries(snapshot).forEach(([key, value]) => localStorage.setItem(key, value));
-    return true;
-  } catch (err) {
-    // Desfaz a gravação parcial para não deixar os dados inconsistentes.
-    Object.entries(previous).forEach(([key, value]) => {
-      if (value === null) localStorage.removeItem(key);
-      else localStorage.setItem(key, value);
-    });
+    const resposta = await fetch(API.conteudo, { cache: 'no-store' });
 
-    if (isQuotaError(err)) {
-      alert(
-        'O espaço de armazenamento do navegador acabou!\n\n' +
-        'As fotos ocupam bastante espaço. Para continuar:\n' +
-        '• Baixe um backup (botão "Backup") para não perder nada;\n' +
-        '• Apague fotos antigas que não usa mais;\n' +
-        '• Ou use menos fotos por produto.\n\n' +
-        'Esta última alteração NÃO foi salva.'
-      );
-    } else {
-      console.error('Falha ao salvar os dados.', err);
-      alert('Não foi possível salvar a alteração neste navegador.');
+    if (resposta.ok) {
+      const dados = await resposta.json();
+      backendOnline = true;
+      backendPublicavel = Boolean(dados.armazenamento && dados.armazenamento.publicavel);
+      conteudo = dados.conteudo;
+      if (conteudo) guardaCache(conteudo);
     }
+  } catch (err) {
+    console.warn('Servidor de conteúdo indisponível; usando cópia local.', err);
+  }
+
+  // Servidor fora do ar: mostra a última versão conhecida.
+  if (!conteudo && !backendOnline) conteudo = leCache();
+
+  // Primeira publicação ainda não aconteceu (ou nada em cache).
+  if (!conteudo) {
+    try {
+      conteudo = await buscaConteudoInicial();
+    } catch (err) {
+      console.error(err);
+      conteudo = { categories: [], products: [], promos: [], promoSettings: {} };
+    }
+  }
+
+  aplicaConteudo(conteudo);
+}
+
+// Publica o conteúdo atual. Devolve true quando o servidor confirmou.
+async function persist(mensagemSucesso) {
+  if (!backendOnline) {
+    alert(
+      'O site não conseguiu falar com o servidor.\n\n' +
+      'A alteração NÃO foi publicada. Verifique sua conexão e tente de novo.'
+    );
     return false;
   }
+
+  if (!authToken) {
+    alert('Sua sessão expirou. Entre novamente na área restrita para publicar.');
+    exitAdminMode();
+    return false;
+  }
+
+  let publicou = false;
+  mostraPublicando(true);
+
+  try {
+    const resposta = await fetch(API.conteudo, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${authToken}`
+      },
+      body: JSON.stringify(conteudoAtual())
+    });
+
+    if (resposta.status === 401) {
+      limpaToken();
+      alert('Sua sessão expirou. Entre novamente para continuar publicando.');
+      exitAdminMode();
+    } else if (!resposta.ok) {
+      const dados = await resposta.json().catch(() => ({}));
+      alert(`Não foi possível publicar.\n\n${dados.erro || `Erro ${resposta.status}.`}`);
+    } else {
+      guardaCache(conteudoAtual());
+      publicou = true;
+    }
+  } catch (err) {
+    console.error(err);
+    alert('Não foi possível publicar. Verifique sua conexão e tente de novo.');
+  } finally {
+    mostraPublicando(false);
+  }
+
+  if (publicou && mensagemSucesso) showToast(mensagemSucesso);
+  return publicou;
 }
 
-// Salva e avisa na tela. Devolve true quando deu certo.
-function persist(successMessage) {
-  const ok = saveData();
-  if (ok && successMessage) showToast(successMessage);
-  return ok;
+/* Antes desta versão, tudo era salvo no navegador. Se ainda houver conteúdo
+   guardado por lá, oferecemos publicá-lo em vez de deixá-lo se perder. */
+const CHAVES_ANTIGAS = {
+  categories: 'gg_categories',
+  products: 'gg_products',
+  promos: 'gg_promos',
+  promoSettings: 'gg_promo_settings'
+};
+
+function leConteudoAntigo() {
+  try {
+    const produtos = JSON.parse(localStorage.getItem(CHAVES_ANTIGAS.products) || 'null');
+    if (!Array.isArray(produtos) || produtos.length === 0) return null;
+
+    return {
+      categories: JSON.parse(localStorage.getItem(CHAVES_ANTIGAS.categories) || 'null') || categories,
+      products: produtos,
+      promos: JSON.parse(localStorage.getItem(CHAVES_ANTIGAS.promos) || 'null') || promos,
+      promoSettings: JSON.parse(localStorage.getItem(CHAVES_ANTIGAS.promoSettings) || 'null') || promoSettings
+    };
+  } catch (err) {
+    console.warn('Conteúdo antigo ilegível.', err);
+    return null;
+  }
+}
+
+function descartaConteudoAntigo() {
+  Object.values(CHAVES_ANTIGAS).forEach(chave => {
+    try {
+      localStorage.removeItem(chave);
+    } catch {
+      /* nada a fazer */
+    }
+  });
+}
+
+async function ofereceMigracao() {
+  const antigo = leConteudoAntigo();
+  if (!antigo) return;
+
+  const totalFotos = antigo.products.reduce(
+    (soma, p) => soma + (Array.isArray(p.images) ? p.images.length : (p.image ? 1 : 0)),
+    0
+  );
+
+  const querPublicar = confirm(
+    `Encontramos ${antigo.products.length} produtos e ${totalFotos} fotos que você cadastrou ` +
+    `neste navegador na versão anterior do site, e que os clientes nunca chegaram a ver.\n\n` +
+    `Deseja publicá-los agora, para que fiquem visíveis para todo mundo?\n\n` +
+    `(Se escolher "Cancelar", esse conteúdo será descartado.)`
+  );
+
+  if (!querPublicar) {
+    if (confirm('Tem certeza? O conteúdo antigo deste navegador será apagado.')) descartaConteudoAntigo();
+    return;
+  }
+
+  const anterior = JSON.stringify(conteudoAtual());
+  aplicaConteudo(antigo);
+
+  // As fotos antigas viraram texto embutido; sobem para o servidor uma a uma.
+  mostraProgresso('Enviando fotos antigas para o servidor...');
+
+  try {
+    for (const item of [...products, ...promos]) {
+      const enviadas = [];
+
+      for (const foto of item.images) {
+        enviadas.push(foto.startsWith('data:') ? await enviaFoto(foto) : foto);
+      }
+
+      item.images = enviadas;
+    }
+  } catch (err) {
+    console.error(err);
+    escondeProgresso();
+    alert(`Não foi possível enviar todas as fotos antigas.\n\n${err.message}\n\nNada foi publicado.`);
+    aplicaConteudo(JSON.parse(anterior));
+    return;
+  }
+
+  escondeProgresso();
+
+  if (await persist('Conteúdo antigo publicado! Agora seus clientes conseguem ver.')) {
+    descartaConteudoAntigo();
+    renderApp();
+  } else {
+    aplicaConteudo(JSON.parse(anterior));
+  }
+}
+
+// Envia a foto para o servidor e devolve o endereço público dela.
+async function enviaFoto(dataUrl) {
+  const resposta = await fetch(API.upload, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${authToken}`
+    },
+    body: JSON.stringify({ arquivo: dataUrl })
+  });
+
+  if (!resposta.ok) {
+    const dados = await resposta.json().catch(() => ({}));
+    throw new Error(dados.erro || `Falha ao enviar a foto (erro ${resposta.status}).`);
+  }
+
+  const { url } = await resposta.json();
+  return url;
 }
 
 /* --------------------------------------------------------------------------
@@ -615,7 +658,7 @@ function renderPromoGrid() {
             ${priceHTML}
           </div>
           <a href="${waUrl}" target="_blank" class="btn btn-sm btn-primary">
-            <i data-lucide="shopping-bag"></i> Encomendar
+            <i data-lucide="shopping-bag"></i> ${escapeHtml(item.buttonText || 'Encomendar')}
           </a>
           ${isAdminMode ? `
             <div class="admin-card-controls admin-card-controls-promo">
@@ -669,24 +712,70 @@ function closeAdminPasswordModal() {
   if (modal) modal.classList.remove('open');
 }
 
-function verifyAdminPassword(event) {
+// A senha é conferida no servidor: ela não existe mais no código da página.
+async function verifyAdminPassword(event) {
   event.preventDefault();
-  const input = document.getElementById('admin-pass-input');
-  const pass = input.value.trim();
 
-  if (pass === ADMIN_PIN || pass === 'gg2026') {
+  const input = document.getElementById('admin-pass-input');
+  const botao = event.target.querySelector('button[type="submit"]');
+  const senha = input.value.trim();
+
+  if (!backendOnline) {
+    alert(
+      'O site não conseguiu falar com o servidor.\n\n' +
+      'Sem ele não é possível publicar alterações. Tente novamente em instantes.'
+    );
+    return;
+  }
+
+  if (botao) botao.disabled = true;
+
+  try {
+    const resposta = await fetch(API.login, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ senha })
+    });
+
+    const dados = await resposta.json().catch(() => ({}));
+
+    if (!resposta.ok) {
+      alert(dados.erro || 'Senha incorreta! Acesso negado.');
+      return;
+    }
+
+    guardaToken(dados.token);
+    backendPublicavel = Boolean(dados.armazenamento && dados.armazenamento.publicavel);
+
     isAdminMode = true;
+    input.value = '';
     closeAdminPasswordModal();
     updateAdminVisibility();
     renderApp();
+
     showToast('Modo administrativo ativado. Bom trabalho, Gabriela!');
-  } else {
-    alert('Senha incorreta! Acesso negado.');
+
+    // Se o envio das fotos falhar, a migração reverte e nada é descartado.
+    await ofereceMigracao();
+
+    if (!backendPublicavel) {
+      alert(
+        'Atenção: o armazenamento de fotos ainda não foi configurado neste site.\n\n' +
+        'Os textos e preços serão publicados normalmente, mas fotos novas podem falhar. ' +
+        'Peça para configurar o Vercel Blob.'
+      );
+    }
+  } catch (err) {
+    console.error(err);
+    alert('Não foi possível entrar. Verifique sua conexão e tente de novo.');
+  } finally {
+    if (botao) botao.disabled = false;
   }
 }
 
 function exitAdminMode() {
   isAdminMode = false;
+  limpaToken();
   updateAdminVisibility();
   renderApp();
 }
@@ -766,21 +855,32 @@ async function handleImageFiles(event, targetList, renderFn) {
   const files = Array.from(event.target.files || []);
   if (files.length === 0) return;
 
-  showToast(`Processando ${files.length} ${files.length === 1 ? 'foto' : 'fotos'}...`);
+  let enviadas = 0;
+  let posicao = 0;
 
   for (const file of files) {
+    posicao++;
+    mostraProgresso(`Enviando foto ${posicao} de ${files.length}...`);
+
     try {
+      // Reduz no navegador e sobe para o servidor: o card guarda só o endereço.
       const dataUrl = await compressImage(file);
-      targetList.push(dataUrl);
+      targetList.push(await enviaFoto(dataUrl));
+      enviadas++;
+      renderFn();
     } catch (err) {
       console.error(err);
-      alert(err.message);
+      alert(`Não foi possível enviar "${file.name}".\n\n${err.message}`);
     }
   }
 
   event.target.value = '';
   renderFn();
-  showToast(`${files.length} ${files.length === 1 ? 'foto adicionada' : 'fotos adicionadas'}. Não esqueça de salvar!`);
+  escondeProgresso();
+
+  if (enviadas > 0) {
+    showToast(`${enviadas} ${enviadas === 1 ? 'foto enviada' : 'fotos enviadas'}. Agora clique em Salvar.`);
+  }
 }
 
 function renderGalleryPreview(containerId, list, kind) {
@@ -902,7 +1002,7 @@ function closeProductModal() {
   if (modal) modal.classList.remove('open');
 }
 
-function saveProductForm(event) {
+async function saveProductForm(event) {
   event.preventDefault();
 
   const editId = document.getElementById('edit-product-id').value;
@@ -924,7 +1024,7 @@ function saveProductForm(event) {
     products.push({ id: 'p_' + Date.now(), ...payload });
   }
 
-  if (persist('Produto salvo com sucesso!')) {
+  if (await persist('Produto salvo e publicado!')) {
     closeProductModal();
     renderApp();
   } else {
@@ -932,7 +1032,7 @@ function saveProductForm(event) {
   }
 }
 
-function deleteProduct(productId) {
+async function deleteProduct(productId) {
   const product = products.find(p => p.id === productId);
   if (!product) return;
 
@@ -941,7 +1041,7 @@ function deleteProduct(productId) {
   const backup = JSON.stringify(products);
   products = products.filter(p => p.id !== productId);
 
-  if (persist('Produto excluído.')) renderApp();
+  if (await persist('Produto excluído.')) renderApp();
   else products = JSON.parse(backup);
 }
 
@@ -1031,7 +1131,7 @@ function slugify(name) {
     .replace(/[^a-z0-9]/g, '');
 }
 
-function saveCategoryForm(event) {
+async function saveCategoryForm(event) {
   event.preventDefault();
 
   const editId = document.getElementById('edit-category-id').value;
@@ -1058,7 +1158,7 @@ function saveCategoryForm(event) {
     categories.push({ id, name, desc, icon });
   }
 
-  if (persist('Categoria salva!')) {
+  if (await persist('Categoria salva e publicada!')) {
     closeCategoryEditModal();
     renderAdminCategoryList();
     renderApp();
@@ -1067,7 +1167,7 @@ function saveCategoryForm(event) {
   }
 }
 
-function addNewCategory(event) {
+async function addNewCategory(event) {
   event.preventDefault();
   const nameInput = document.getElementById('new-cat-name');
   const name = nameInput.value.trim();
@@ -1083,7 +1183,7 @@ function addNewCategory(event) {
   const backup = JSON.stringify(categories);
   categories.push({ id, name, icon: 'tag', desc: `Produtos da categoria ${name}` });
 
-  if (persist('Categoria criada!')) {
+  if (await persist('Categoria criada e publicada!')) {
     nameInput.value = '';
     renderAdminCategoryList();
     renderApp();
@@ -1092,7 +1192,7 @@ function addNewCategory(event) {
   }
 }
 
-function deleteCategory(catId) {
+async function deleteCategory(catId) {
   const cat = categories.find(c => c.id === catId);
   if (!cat) return;
 
@@ -1116,7 +1216,7 @@ function deleteCategory(catId) {
   products.forEach(p => { if (p.category === catId) p.category = 'brindes'; });
   if (currentFilter === catId) currentFilter = 'all';
 
-  if (persist('Categoria excluída.')) {
+  if (await persist('Categoria excluída.')) {
     renderAdminCategoryList();
     renderApp();
   } else {
@@ -1146,6 +1246,7 @@ function openPromoItemModal(promoId = null, focus = null) {
       document.getElementById('pr-original-price').value = item.originalPrice || '';
       document.getElementById('pr-promo-price').value = item.promoPrice || '';
       document.getElementById('pr-tag').value = item.tag || '';
+      document.getElementById('pr-button').value = item.buttonText || '';
       promoImages = [...(item.images || [])];
     }
   } else {
@@ -1167,7 +1268,7 @@ function closePromoItemModal() {
   if (modal) modal.classList.remove('open');
 }
 
-function savePromoItemForm(event) {
+async function savePromoItemForm(event) {
   event.preventDefault();
 
   const editId = document.getElementById('edit-promo-id').value;
@@ -1177,6 +1278,7 @@ function savePromoItemForm(event) {
     originalPrice: parseFloat(document.getElementById('pr-original-price').value) || null,
     promoPrice: parseFloat(document.getElementById('pr-promo-price').value) || 0,
     tag: document.getElementById('pr-tag').value.trim(),
+    buttonText: document.getElementById('pr-button').value.trim(),
     images: [...promoImages]
   };
 
@@ -1189,7 +1291,7 @@ function savePromoItemForm(event) {
     promos.push({ id: 'promo_' + Date.now(), ...payload });
   }
 
-  if (persist('Oferta salva!')) {
+  if (await persist('Oferta salva e publicada!')) {
     closePromoItemModal();
     renderApp();
   } else {
@@ -1197,7 +1299,7 @@ function savePromoItemForm(event) {
   }
 }
 
-function deletePromoItem(promoId) {
+async function deletePromoItem(promoId) {
   const item = promos.find(pr => pr.id === promoId);
   if (!item) return;
 
@@ -1206,7 +1308,7 @@ function deletePromoItem(promoId) {
   const backup = JSON.stringify(promos);
   promos = promos.filter(pr => pr.id !== promoId);
 
-  if (persist('Oferta excluída.')) renderApp();
+  if (await persist('Oferta excluída.')) renderApp();
   else promos = JSON.parse(backup);
 }
 
@@ -1235,7 +1337,7 @@ function closePromoSettingsModal() {
   if (modal) modal.classList.remove('open');
 }
 
-function savePromoSettingsForm(event) {
+async function savePromoSettingsForm(event) {
   event.preventDefault();
 
   const backup = JSON.stringify(promoSettings);
@@ -1253,7 +1355,7 @@ function savePromoSettingsForm(event) {
     enabled: document.getElementById('ps-section-on').checked
   };
 
-  if (persist('Campanha atualizada!')) {
+  if (await persist('Campanha atualizada e publicada!')) {
     closePromoSettingsModal();
     renderApp();
   } else {
@@ -1276,34 +1378,41 @@ function closeBackupModal() {
   if (modal) modal.classList.remove('open');
 }
 
-function storageBytesUsed() {
-  return Object.values(STORAGE_KEYS).reduce((total, key) => {
-    const value = localStorage.getItem(key);
-    // Cada caractere ocupa 2 bytes no armazenamento do navegador.
-    return total + (value ? value.length * 2 : 0);
-  }, 0);
-}
-
+// Mostra, no modal de backup, se o site está mesmo publicando.
 function updateStorageMeter() {
-  const LIMIT = 5 * 1024 * 1024;
-  const used = storageBytesUsed();
-  const percent = Math.min(100, Math.round((used / LIMIT) * 100));
+  const texto = document.getElementById('storage-usage-text');
+  const dica = document.getElementById('storage-usage-hint');
+  const caixa = document.getElementById('backend-status');
 
-  const text = document.getElementById('storage-usage-text');
-  const fill = document.getElementById('storage-usage-fill');
-  const hint = document.getElementById('storage-usage-hint');
+  const totalFotos = [...products, ...promos]
+    .reduce((soma, item) => soma + (item.images || []).length, 0);
 
-  if (text) text.textContent = `${(used / (1024 * 1024)).toFixed(2)} MB de ~5 MB (${percent}%)`;
-  if (fill) {
-    fill.style.width = `${percent}%`;
-    fill.classList.toggle('is-warning', percent >= 70 && percent < 90);
-    fill.classList.toggle('is-danger', percent >= 90);
+  if (texto) {
+    texto.textContent = `${products.length} produtos, ${promos.length} ofertas, ${totalFotos} fotos`;
   }
-  if (hint) {
-    hint.textContent = percent >= 90
-      ? 'Espaço quase no fim! Baixe um backup e remova fotos que não usa mais.'
-      : 'O navegador reserva cerca de 5 MB para os dados do site.';
+
+  if (dica) {
+    dica.textContent = backendOnline
+      ? 'Tudo o que você salva vai direto para o ar, para todos os clientes.'
+      : 'O servidor não respondeu. As alterações não serão publicadas agora.';
   }
+
+  if (caixa) {
+    const ok = backendOnline && backendPublicavel;
+
+    caixa.className = `alert-box ${ok ? 'alert-ok' : 'alert-warning'}`;
+    caixa.innerHTML = ok
+      ? `<i data-lucide="check-circle"></i>
+         <div><strong>Publicação ativa.</strong> As alterações que você salva aparecem
+         imediatamente para qualquer pessoa que abrir o site, em qualquer aparelho.</div>`
+      : `<i data-lucide="alert-triangle"></i>
+         <div><strong>Publicação indisponível no momento.</strong> ${backendOnline
+           ? 'O armazenamento de fotos ainda não foi configurado neste site.'
+           : 'O site não conseguiu falar com o servidor.'}
+         Baixe um backup antes de fechar a página para não perder nada.</div>`;
+  }
+
+  refreshIcons();
 }
 
 function exportData() {
@@ -1338,7 +1447,7 @@ function importData(event) {
 
   const reader = new FileReader();
 
-  reader.onload = () => {
+  reader.onload = async () => {
     let data;
 
     try {
@@ -1355,7 +1464,7 @@ function importData(event) {
       return;
     }
 
-    if (!confirm('Restaurar este backup vai substituir TODO o conteúdo atual do site neste navegador.\n\nDeseja continuar?')) {
+    if (!confirm('Restaurar este backup vai substituir TODO o conteúdo do site publicado.\n\nDeseja continuar?')) {
       event.target.value = '';
       return;
     }
@@ -1370,9 +1479,9 @@ function importData(event) {
     categories = data.categories;
     products = data.products.map(normalizeItem);
     promos = Array.isArray(data.promos) ? data.promos.map(normalizeItem) : promos;
-    promoSettings = { ...DEFAULT_PROMO_SETTINGS, ...(data.promoSettings || {}) };
+    promoSettings = { ...PROMO_SETTINGS_PADRAO, ...(data.promoSettings || {}) };
 
-    if (persist('Backup restaurado com sucesso!')) {
+    if (await persist('Backup restaurado e publicado!')) {
       closeBackupModal();
       renderApp();
     } else {
@@ -1393,15 +1502,26 @@ function importData(event) {
   reader.readAsText(file);
 }
 
-function resetToDefaults() {
+async function resetToDefaults() {
   if (!confirm('Isto apaga TODAS as suas alterações e volta o site ao conteúdo original.\n\nTem certeza?')) return;
-  if (!confirm('Confirmação final: todo o conteúdo que você cadastrou será perdido. Continuar?')) return;
+  if (!confirm('Confirmação final: todo o conteúdo que você cadastrou será perdido, inclusive para os clientes. Continuar?')) return;
 
-  Object.values(STORAGE_KEYS).forEach(key => localStorage.removeItem(key));
-  loadData();
-  closeBackupModal();
-  renderApp();
-  showToast('Conteúdo original restaurado.');
+  const anterior = JSON.stringify(conteudoAtual());
+
+  try {
+    aplicaConteudo(await buscaConteudoInicial());
+  } catch (err) {
+    console.error(err);
+    alert('Não foi possível ler o conteúdo original do site.');
+    return;
+  }
+
+  if (await persist('Conteúdo original restaurado e publicado.')) {
+    closeBackupModal();
+    renderApp();
+  } else {
+    aplicaConteudo(JSON.parse(anterior));
+  }
 }
 
 /* --------------------------------------------------------------------------
@@ -1668,6 +1788,30 @@ function initCountdownTimer() {
 
 let toastTimer = null;
 
+// Aviso que fica na tela enquanto algo demorado acontece (envio ou publicação).
+function mostraProgresso(mensagem) {
+  const toast = document.getElementById('toast');
+  const msg = document.getElementById('toast-msg');
+  if (!toast || !msg) return;
+
+  clearTimeout(toastTimer);
+  msg.textContent = mensagem;
+  toast.classList.add('show', 'is-busy');
+}
+
+function escondeProgresso() {
+  const toast = document.getElementById('toast');
+  if (!toast) return;
+
+  toast.classList.remove('is-busy');
+  if (!toastTimer) toast.classList.remove('show');
+}
+
+function mostraPublicando(ativo) {
+  if (ativo) mostraProgresso('Publicando alterações...');
+  else escondeProgresso();
+}
+
 function showToast(message) {
   const toast = document.getElementById('toast');
   const msg = document.getElementById('toast-msg');
@@ -1675,9 +1819,13 @@ function showToast(message) {
 
   msg.textContent = message;
   toast.classList.add('show');
+  toast.classList.remove('is-busy');
 
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => toast.classList.remove('show'), 3200);
+  toastTimer = setTimeout(() => {
+    toast.classList.remove('show');
+    toastTimer = null;
+  }, 3200);
 }
 
 /* --------------------------------------------------------------------------

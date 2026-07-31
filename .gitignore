@@ -1,8 +1,14 @@
-# Arquivo de servidor local (não necessário na Vercel)
-server.js
-
-# Dependências Node (não há, mas por precaução)
+# Dependências Node
 node_modules/
+
+# Dados e fotos gravados pelo servidor local (na Vercel isso vive no Redis/Blob)
+.dados/
+uploads/
+
+# Variáveis de ambiente e configuração local da Vercel
+.env
+.env.*
+.vercel
 
 # Arquivos de sistema
 .DS_Store

@@ -783,6 +783,11 @@
         </div>
 
         <div class="form-group">
+          <label for="pr-button"><i data-lucide="mouse-pointer-click"></i> Texto do Botão (vazio = "Encomendar"):</label>
+          <input type="text" id="pr-button" placeholder="Ex: Encomendar Kit, Encomendar Boné...">
+        </div>
+
+        <div class="form-group">
           <label for="pr-image-file"><i data-lucide="images"></i> Fotos da Oferta (pode escolher várias):</label>
           <input type="file" id="pr-image-file" accept="image/*" multiple onchange="addPromoImages(event)">
           <div class="add-by-url-row">
@@ -880,22 +885,17 @@
         <h3><i data-lucide="hard-drive"></i> Backup e Publicação</h3>
       </div>
       <div class="admin-modal-body">
-        <div class="alert-box alert-warning">
-          <i data-lucide="alert-triangle"></i>
-          <div>
-            <strong>Importante:</strong> tudo o que você edita fica salvo <u>somente neste navegador</u>.
-            Seus clientes continuam vendo a versão publicada do site. Para que as mudanças apareçam
-            para todo mundo, baixe o arquivo de backup e envie para quem publica o site.
-          </div>
+        <div class="alert-box alert-ok" id="backend-status">
+          <i data-lucide="check-circle"></i>
+          <div>Verificando a situação da publicação...</div>
         </div>
 
         <div class="storage-meter">
           <div class="storage-meter-label">
-            <span><i data-lucide="database"></i> Espaço usado pelas fotos</span>
+            <span><i data-lucide="database"></i> Conteúdo publicado</span>
             <strong id="storage-usage-text">—</strong>
           </div>
-          <div class="storage-meter-bar"><div class="storage-meter-fill" id="storage-usage-fill"></div></div>
-          <p class="form-hint" id="storage-usage-hint">O navegador reserva cerca de 5 MB para os dados do site.</p>
+          <p class="form-hint" id="storage-usage-hint">Tudo o que você salva vai direto para o ar.</p>
         </div>
 
         <div class="backup-actions">
