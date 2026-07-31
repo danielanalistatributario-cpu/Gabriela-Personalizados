@@ -74,19 +74,44 @@ document.addEventListener('DOMContentLoaded', async () => {
    1. CONTEÚDO: LEITURA E PUBLICAÇÃO
    -------------------------------------------------------------------------- */
 
+/* Cada foto é guardada como { url, thumb }: a versão grande abre no
+   lightbox e a miniatura (bem mais leve) aparece nas faixas dos cards.
+   Formatos antigos continuam valendo — texto solto vira {url, thumb} igual. */
+function normalizeImage(entrada) {
+  if (typeof entrada === 'string') {
+    const url = entrada.trim();
+    return url ? { url, thumb: url } : null;
+  }
+
+  if (entrada && typeof entrada === 'object' && typeof entrada.url === 'string') {
+    const url = entrada.url.trim();
+    if (!url) return null;
+    return { url, thumb: (entrada.thumb || url).trim() || url };
+  }
+
+  return null;
+}
+
 // Aceita tanto o formato antigo (image: '...') quanto o novo (images: [...])
 function normalizeItem(item) {
-  let images = [];
+  let brutas = [];
 
-  if (Array.isArray(item.images)) {
-    images = item.images.filter(src => typeof src === 'string' && src.trim() !== '');
-  } else if (typeof item.image === 'string' && item.image.trim() !== '') {
-    images = [item.image];
-  }
+  if (Array.isArray(item.images)) brutas = item.images;
+  else if (item.image) brutas = [item.image];
+
+  const images = brutas.map(normalizeImage).filter(Boolean);
 
   const normalized = { ...item, images };
   delete normalized.image;
   return normalized;
+}
+
+function imgUrl(foto) {
+  return (foto && foto.url) || '';
+}
+
+function imgThumb(foto) {
+  return (foto && (foto.thumb || foto.url)) || '';
 }
 
 function conteudoAtual() {
@@ -310,7 +335,13 @@ async function ofereceMigracao() {
       const enviadas = [];
 
       for (const foto of item.images) {
-        enviadas.push(foto.startsWith('data:') ? await enviaFoto(foto) : foto);
+        if (!imgUrl(foto).startsWith('data:')) {
+          enviadas.push(foto);
+          continue;
+        }
+
+        const mini = await reduzDataUrl(imgUrl(foto), 320, 0.7);
+        enviadas.push(await enviaFoto(imgUrl(foto), mini));
       }
 
       item.images = enviadas;
@@ -333,15 +364,15 @@ async function ofereceMigracao() {
   }
 }
 
-// Envia a foto para o servidor e devolve o endereço público dela.
-async function enviaFoto(dataUrl) {
+// Envia a foto (e a miniatura) e devolve os endereços públicos.
+async function enviaFoto(dataUrl, miniatura = null) {
   const resposta = await fetch(API.upload, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${authToken}`
     },
-    body: JSON.stringify({ arquivo: dataUrl })
+    body: JSON.stringify({ arquivo: dataUrl, miniatura })
   });
 
   if (!resposta.ok) {
@@ -349,8 +380,8 @@ async function enviaFoto(dataUrl) {
     throw new Error(dados.erro || `Falha ao enviar a foto (erro ${resposta.status}).`);
   }
 
-  const { url } = await resposta.json();
-  return url;
+  const { url, thumb } = await resposta.json();
+  return { url, thumb: thumb || url };
 }
 
 /* --------------------------------------------------------------------------
@@ -370,8 +401,10 @@ function refreshIcons() {
   if (window.lucide) window.lucide.createIcons();
 }
 
+const FOTO_RESERVA = './3f7b4bd0-54a9-4490-96f7-d2e134892c30.jpg';
+
 function coverImage(item) {
-  return (item.images && item.images[0]) || './3f7b4bd0-54a9-4490-96f7-d2e134892c30.jpg';
+  return imgUrl(item.images && item.images[0]) || FOTO_RESERVA;
 }
 
 function formatPrice(value) {
@@ -385,9 +418,9 @@ function renderCardStrip(item) {
 
   return `
     <div class="card-gallery-strip" role="group" aria-label="Fotos de ${escapeAttr(item.title)}">
-      ${images.map((src, i) => `
-        <button type="button" class="card-thumb ${i === 0 ? 'active' : ''}" onclick="setCardPhoto(event)" aria-label="Ver foto ${i + 1} de ${images.length}">
-          <img src="${escapeAttr(src)}" alt="" loading="lazy">
+      ${images.map((foto, i) => `
+        <button type="button" class="card-thumb ${i === 0 ? 'active' : ''}" data-grande="${escapeAttr(imgUrl(foto))}" onclick="setCardPhoto(event)" aria-label="Ver foto ${i + 1} de ${images.length}">
+          <img src="${escapeAttr(imgThumb(foto))}" alt="" loading="lazy">
         </button>
       `).join('')}
     </div>
@@ -400,9 +433,10 @@ function setCardPhoto(event) {
   const card = strip.closest('.portfolio-card-clean, .promo-product-card');
   if (!card) return;
 
+  // Usa a versão grande guardada no botão, não a miniatura que ele exibe.
   const mainImage = card.querySelector('.portfolio-img-container img, .promo-img-box img');
-  const thumbImage = button.querySelector('img');
-  if (mainImage && thumbImage) mainImage.src = thumbImage.src;
+  const grande = button.dataset.grande;
+  if (mainImage && grande) mainImage.src = grande;
 
   strip.querySelectorAll('.card-thumb').forEach(btn => btn.classList.remove('active'));
   button.classList.add('active');
@@ -814,37 +848,45 @@ function handleLogoClicks(event) {
 
 // Reduz a foto antes de guardar: fotos de celular passam de 4 MB e estouram
 // o limite do navegador em poucas imagens.
+// Redesenha a imagem num tamanho menor e devolve o JPEG resultante.
+function reduzDataUrl(dataUrl, maxDimension, quality, nome = 'a imagem') {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+
+    img.onerror = () => reject(new Error(`"${nome}" não parece ser uma imagem válida.`));
+    img.onload = () => {
+      let { width, height } = img;
+
+      if (width > maxDimension || height > maxDimension) {
+        const scale = maxDimension / Math.max(width, height);
+        width = Math.round(width * scale);
+        height = Math.round(height * scale);
+      }
+
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+
+      const ctx = canvas.getContext('2d');
+      // Fundo branco: PNG com transparência ficaria preto ao virar JPEG.
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, width, height);
+      ctx.drawImage(img, 0, 0, width, height);
+
+      resolve(canvas.toDataURL('image/jpeg', quality));
+    };
+
+    img.src = dataUrl;
+  });
+}
+
 function compressImage(file, maxDimension = 1200, quality = 0.82) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
 
     reader.onerror = () => reject(new Error(`Não foi possível ler "${file.name}".`));
     reader.onload = () => {
-      const img = new Image();
-
-      img.onerror = () => reject(new Error(`"${file.name}" não parece ser uma imagem válida.`));
-      img.onload = () => {
-        let { width, height } = img;
-
-        if (width > maxDimension || height > maxDimension) {
-          const scale = maxDimension / Math.max(width, height);
-          width = Math.round(width * scale);
-          height = Math.round(height * scale);
-        }
-
-        const canvas = document.createElement('canvas');
-        canvas.width = width;
-        canvas.height = height;
-
-        const ctx = canvas.getContext('2d');
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(0, 0, width, height);
-        ctx.drawImage(img, 0, 0, width, height);
-
-        resolve(canvas.toDataURL('image/jpeg', quality));
-      };
-
-      img.src = reader.result;
+      reduzDataUrl(reader.result, maxDimension, quality, file.name).then(resolve, reject);
     };
 
     reader.readAsDataURL(file);
@@ -863,9 +905,14 @@ async function handleImageFiles(event, targetList, renderFn) {
     mostraProgresso(`Enviando foto ${posicao} de ${files.length}...`);
 
     try {
-      // Reduz no navegador e sobe para o servidor: o card guarda só o endereço.
-      const dataUrl = await compressImage(file);
-      targetList.push(await enviaFoto(dataUrl));
+      /* Reduz no navegador e sobe duas versões: a grande, que abre ao clicar,
+         e uma miniatura de 320px. Sem a miniatura, a faixa de fotos do card
+         baixaria a imagem inteira só para mostrá-la com 46 pixels — com
+         muitas fotos isso vira dezenas de MB no celular do cliente. */
+      const grande = await compressImage(file, 1200, 0.82);
+      const mini = await compressImage(file, 320, 0.7);
+
+      targetList.push(await enviaFoto(grande, mini));
       enviadas++;
       renderFn();
     } catch (err) {
@@ -892,9 +939,9 @@ function renderGalleryPreview(containerId, list, kind) {
     return;
   }
 
-  container.innerHTML = list.map((src, index) => `
+  container.innerHTML = list.map((foto, index) => `
     <div class="gallery-thumb ${index === 0 ? 'is-cover' : ''}" onclick="setGalleryCover('${kind}', ${index})" title="${index === 0 ? 'Foto de capa' : 'Clique para tornar esta a capa'}">
-      <img src="${escapeAttr(src)}" alt="Foto ${index + 1}">
+      <img src="${escapeAttr(imgThumb(foto))}" alt="Foto ${index + 1}" loading="lazy">
       ${index === 0 ? `<span class="gallery-cover-badge">Capa</span>` : ''}
       <button type="button" class="gallery-remove" onclick="event.stopPropagation(); removeGalleryImage('${kind}', ${index})" title="Remover foto">
         <i data-lucide="x"></i>
@@ -944,7 +991,8 @@ function addImageFromUrlInput(inputId, list, kind) {
   const url = input.value.trim();
   if (!url) return;
 
-  list.push(url);
+  // Endereço colado de fora: não temos miniatura, a própria imagem serve.
+  list.push({ url, thumb: url });
   input.value = '';
   renderGalleryFor(kind);
 }
@@ -1604,7 +1652,9 @@ function openGalleryModal(item, startIndex = 0) {
 
   if (!modal) return;
 
-  modalGallery = (item.images && item.images.length > 0) ? [...item.images] : [coverImage(item)];
+  modalGallery = (item.images && item.images.length > 0)
+    ? [...item.images]
+    : [{ url: coverImage(item), thumb: coverImage(item) }];
   modalGalleryIndex = (startIndex >= 0 && startIndex < modalGallery.length) ? startIndex : 0;
   renderModalGallery();
 
@@ -1634,7 +1684,7 @@ function renderModalGallery() {
   const prev = document.getElementById('gallery-prev');
   const next = document.getElementById('gallery-next');
 
-  if (modalImg) modalImg.src = modalGallery[modalGalleryIndex] || '';
+  if (modalImg) modalImg.src = imgUrl(modalGallery[modalGalleryIndex]);
 
   const multiple = modalGallery.length > 1;
   if (prev) prev.style.display = multiple ? 'flex' : 'none';
@@ -1642,9 +1692,9 @@ function renderModalGallery() {
 
   if (thumbs) {
     thumbs.innerHTML = multiple
-      ? modalGallery.map((src, i) => `
+      ? modalGallery.map((foto, i) => `
           <button class="gallery-thumb-btn ${i === modalGalleryIndex ? 'active' : ''}" onclick="showModalGalleryImage(${i})" aria-label="Ver foto ${i + 1} de ${modalGallery.length}">
-            <img src="${escapeAttr(src)}" alt="Foto ${i + 1}">
+            <img src="${escapeAttr(imgThumb(foto))}" alt="Foto ${i + 1}" loading="lazy">
           </button>
         `).join('')
       : '';
