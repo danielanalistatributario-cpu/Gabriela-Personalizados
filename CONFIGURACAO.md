@@ -14,14 +14,17 @@ Para isso funcionar faltam três coisas no painel da Vercel. Leva uns 5 minutos.
 
 ## 1. Criar o banco de dados (textos e preços)
 
-1. Abra o projeto na Vercel → aba **Storage** → **Create Database**.
-2. Escolha **Redis** (Upstash) → região mais perto do Brasil
+1. Abra o projeto na Vercel → menu lateral **Armazenar** (Storage) →
+   **Create Database**.
+2. Escolha qualquer opção de **Redis** — serve tanto a **Redis Cloud**
+   quanto a **Upstash for Redis**. Região mais perto do Brasil
    (`São Paulo` ou `us-east-1`) → **Create**.
 3. Na tela seguinte, clique em **Connect Project** e escolha este projeto,
    marcando os ambientes **Production**, **Preview** e **Development**.
 
-A Vercel cria sozinha as variáveis `KV_REST_API_URL` e `KV_REST_API_TOKEN`.
-Não precisa copiar nada à mão.
+A Vercel cria sozinha as variáveis de conexão. Não precisa copiar nada à mão:
+o código aceita tanto `REDIS_URL` (Redis Cloud) quanto
+`KV_REST_API_URL` + `KV_REST_API_TOKEN` (Upstash).
 
 ## 2. Criar o armazenamento de fotos
 

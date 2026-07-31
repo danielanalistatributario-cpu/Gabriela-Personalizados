@@ -31,16 +31,62 @@ function configRedis() {
   return url && token ? { url: url.replace(/\/$/, ''), token } : null;
 }
 
+/* Há dois tipos de Redis no marketplace da Vercel:
+   - Upstash, que fala HTTP e injeta KV_REST_API_URL / KV_REST_API_TOKEN;
+   - Redis Cloud (e similares), que injeta uma conexão redis:// em REDIS_URL.
+   Aceitamos os dois para que qualquer escolha no painel funcione. */
+function urlRedisTcp() {
+  return process.env.REDIS_URL || process.env.REDIS_URI || null;
+}
+
+function temArmazenamentoDeConteudo() {
+  return Boolean(configRedis() || urlRedisTcp());
+}
+
 function blobConfigurado() {
   return Boolean(process.env.BLOB_READ_WRITE_TOKEN);
 }
 
 export function modoArmazenamento() {
+  let conteudo = 'arquivo-local';
+  if (configRedis()) conteudo = 'redis-http';
+  else if (urlRedisTcp()) conteudo = 'redis';
+
   return {
-    conteudo: configRedis() ? 'redis' : 'arquivo-local',
+    conteudo,
     fotos: blobConfigurado() ? 'vercel-blob' : 'arquivo-local',
-    publicavel: Boolean(configRedis() && blobConfigurado())
+    publicavel: Boolean(temArmazenamentoDeConteudo() && blobConfigurado())
   };
+}
+
+// Abre a conexão, faz a operação e fecha: em funções serverless não vale
+// a pena manter conexão viva entre chamadas.
+async function comClienteRedis(acao) {
+  const { createClient } = await import('redis');
+
+  const cliente = createClient({
+    url: urlRedisTcp(),
+    socket: {
+      connectTimeout: 5000,
+      // Sem isto o cliente tentaria reconectar para sempre e a função
+      // ficaria pendurada até estourar o tempo limite da Vercel.
+      reconnectStrategy: false
+    }
+  });
+
+  cliente.on('error', err => console.error('Erro no Redis:', err.message));
+
+  try {
+    await cliente.connect();
+  } catch (err) {
+    throw new HttpError(502, `Não foi possível conectar ao banco de dados: ${err.message}`);
+  }
+
+  try {
+    return await acao(cliente);
+  } finally {
+    await cliente.quit().catch(() => {});
+  }
 }
 
 /* ----------------------------- conteúdo ----------------------------- */
@@ -83,6 +129,8 @@ export async function leConteudo() {
 
   if (configRedis()) {
     bruto = await redisGet(CHAVE_CONTEUDO);
+  } else if (urlRedisTcp()) {
+    bruto = await comClienteRedis(cliente => cliente.get(CHAVE_CONTEUDO));
   } else {
     try {
       bruto = await fs.readFile(ARQUIVO_LOCAL, 'utf8');
@@ -103,10 +151,10 @@ export async function leConteudo() {
 
 // Na Vercel o disco é somente leitura: sem Redis não há como gravar nada.
 function exigeArmazenamentoDeConteudo() {
-  if (!configRedis() && process.env.VERCEL) {
+  if (!temArmazenamentoDeConteudo() && process.env.VERCEL) {
     throw new HttpError(503,
       'O banco de dados do site ainda não foi configurado. ' +
-      'Crie um Redis na aba Storage da Vercel e conecte-o a este projeto.'
+      'Crie um Redis em "Armazenar", na Vercel, e conecte-o a este projeto.'
     );
   }
 }
@@ -132,6 +180,8 @@ export async function gravaConteudo(conteudo) {
 
   if (configRedis()) {
     await redisSet(CHAVE_CONTEUDO, texto);
+  } else if (urlRedisTcp()) {
+    await comClienteRedis(cliente => cliente.set(CHAVE_CONTEUDO, texto));
   } else {
     await fs.mkdir(PASTA_LOCAL, { recursive: true });
     await fs.writeFile(ARQUIVO_LOCAL, texto, 'utf8');
