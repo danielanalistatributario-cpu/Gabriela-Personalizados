@@ -335,6 +335,47 @@ function formatPrice(value) {
   return `R$ ${parseFloat(value || 0).toFixed(2).replace('.', ',')}`;
 }
 
+// Faixa com TODAS as fotos do item, direto no card: clicar troca a foto grande.
+function renderCardStrip(item) {
+  const images = item.images || [];
+  if (images.length < 2) return '';
+
+  return `
+    <div class="card-gallery-strip" role="group" aria-label="Fotos de ${escapeAttr(item.title)}">
+      ${images.map((src, i) => `
+        <button type="button" class="card-thumb ${i === 0 ? 'active' : ''}" onclick="setCardPhoto(event)" aria-label="Ver foto ${i + 1} de ${images.length}">
+          <img src="${escapeAttr(src)}" alt="" loading="lazy">
+        </button>
+      `).join('')}
+    </div>
+  `;
+}
+
+function setCardPhoto(event) {
+  const button = event.currentTarget;
+  const strip = button.parentElement;
+  const card = strip.closest('.portfolio-card-clean, .promo-product-card');
+  if (!card) return;
+
+  const mainImage = card.querySelector('.portfolio-img-container img, .promo-img-box img');
+  const thumbImage = button.querySelector('img');
+  if (mainImage && thumbImage) mainImage.src = thumbImage.src;
+
+  strip.querySelectorAll('.card-thumb').forEach(btn => btn.classList.remove('active'));
+  button.classList.add('active');
+}
+
+// Descobre qual foto do card está selecionada, para o lightbox abrir na mesma.
+function activeCardPhotoIndex(event) {
+  if (!event) return 0;
+
+  const card = event.currentTarget.closest('.portfolio-card-clean, .promo-product-card');
+  const active = card?.querySelector('.card-thumb.active');
+  if (!active) return 0;
+
+  return Array.from(active.parentElement.children).indexOf(active);
+}
+
 function discountPercent(item) {
   const original = parseFloat(item.originalPrice);
   const promo = parseFloat(item.promoPrice);
@@ -441,11 +482,13 @@ function renderPortfolioGrid() {
           <span class="card-badge-cat">${escapeHtml(catName)}</span>
           ${photoCount > 1 ? `<span class="card-badge-photos"><i data-lucide="images"></i> ${photoCount}</span>` : ''}
           <div class="portfolio-card-overlay">
-            <button class="zoom-btn" onclick="openProductLightbox('${escapeAttr(p.id)}')">
+            <button class="zoom-btn" onclick="openProductLightbox('${escapeAttr(p.id)}', event)">
               <i data-lucide="zoom-in"></i> Ver Detalhes
             </button>
           </div>
         </div>
+
+        ${renderCardStrip(p)}
 
         <div class="portfolio-body">
           <div class="portfolio-body-top">
@@ -559,11 +602,12 @@ function renderPromoGrid() {
 
     return `
       <div class="promo-product-card">
-        <div class="promo-img-box" onclick="openPromoLightbox('${escapeAttr(item.id)}')">
+        <div class="promo-img-box" onclick="openPromoLightbox('${escapeAttr(item.id)}', event)">
           <img src="${escapeAttr(coverImage(item))}" alt="${escapeAttr(item.title)}" loading="lazy">
           ${tagText ? `<span class="tag-discount">${escapeHtml(tagText)}</span>` : ''}
           ${photoCount > 1 ? `<span class="card-badge-photos"><i data-lucide="images"></i> ${photoCount}</span>` : ''}
         </div>
+        ${renderCardStrip(item)}
         <div class="promo-card-body">
           <h3>${escapeHtml(item.title)}</h3>
           <p>${escapeHtml(item.description)}</p>
@@ -1421,17 +1465,17 @@ function sendCalculatedOrder() {
 /* --------------------------------------------------------------------------
    12. MODAL LIGHTBOX COM GALERIA
    -------------------------------------------------------------------------- */
-function openProductLightbox(productId) {
+function openProductLightbox(productId, event) {
   const p = products.find(prod => prod.id === productId);
-  if (p) openGalleryModal(p);
+  if (p) openGalleryModal(p, activeCardPhotoIndex(event));
 }
 
-function openPromoLightbox(promoId) {
+function openPromoLightbox(promoId, event) {
   const item = promos.find(pr => pr.id === promoId);
-  if (item) openGalleryModal(item);
+  if (item) openGalleryModal(item, activeCardPhotoIndex(event));
 }
 
-function openGalleryModal(item) {
+function openGalleryModal(item, startIndex = 0) {
   const modal = document.getElementById('image-modal');
   const modalTitle = document.getElementById('modal-title');
   const modalDesc = document.getElementById('modal-desc');
@@ -1441,7 +1485,7 @@ function openGalleryModal(item) {
   if (!modal) return;
 
   modalGallery = (item.images && item.images.length > 0) ? [...item.images] : [coverImage(item)];
-  modalGalleryIndex = 0;
+  modalGalleryIndex = (startIndex >= 0 && startIndex < modalGallery.length) ? startIndex : 0;
   renderModalGallery();
 
   modalTitle.textContent = item.title;
@@ -1479,11 +1523,15 @@ function renderModalGallery() {
   if (thumbs) {
     thumbs.innerHTML = multiple
       ? modalGallery.map((src, i) => `
-          <button class="gallery-thumb-btn ${i === modalGalleryIndex ? 'active' : ''}" onclick="showModalGalleryImage(${i})" aria-label="Ver foto ${i + 1}">
+          <button class="gallery-thumb-btn ${i === modalGalleryIndex ? 'active' : ''}" onclick="showModalGalleryImage(${i})" aria-label="Ver foto ${i + 1} de ${modalGallery.length}">
             <img src="${escapeAttr(src)}" alt="Foto ${i + 1}">
           </button>
         `).join('')
       : '';
+
+    // Mantém a miniatura da foto atual sempre à vista na faixa rolável.
+    thumbs.querySelector('.gallery-thumb-btn.active')
+      ?.scrollIntoView({ block: 'nearest', inline: 'center' });
   }
 }
 
