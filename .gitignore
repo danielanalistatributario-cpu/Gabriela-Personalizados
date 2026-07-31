@@ -1,0 +1,12 @@
+# Arquivo de servidor local (não necessário na Vercel)
+server.js
+
+# Dependências Node (não há, mas por precaução)
+node_modules/
+
+# Arquivos de sistema
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
