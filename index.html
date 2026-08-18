@@ -816,6 +816,21 @@
         <h3><i data-lucide="settings"></i> Configurar Campanha Promocional</h3>
       </div>
       <form id="promo-settings-form" onsubmit="savePromoSettingsForm(event)" class="admin-form">
+        <div class="form-group modelo-campanha">
+          <label for="ps-modelo"><i data-lucide="wand-sparkles"></i> Começar de um modelo pronto:</label>
+          <div class="add-by-url-row">
+            <select id="ps-modelo">
+              <option value="">Escolha uma data comemorativa...</option>
+            </select>
+            <button type="button" class="btn btn-sm btn-outline" onclick="aplicaModeloCampanha()">
+              <i data-lucide="check"></i> Usar
+            </button>
+          </div>
+          <p class="form-hint"><i data-lucide="info"></i> Preenche os textos abaixo. Você pode ajustar tudo antes de salvar.</p>
+        </div>
+
+        <hr style="margin: 4px 0 8px; border: none; border-top: 1px solid rgba(0,0,0,0.1);">
+
         <div class="form-group">
           <label for="ps-badge"><i data-lucide="sticker"></i> Selo do Topo:</label>
           <input type="text" id="ps-badge" placeholder="Ex: 👔 Especial Dia dos Pais — Edição Limitada">

@@ -227,3 +227,69 @@ export async function salvaFoto(buffer, tipo) {
   await fs.writeFile(path.join(PASTA_UPLOADS, nome), buffer);
   return `/uploads/${nome}`;
 }
+
+/* --------------------- limpeza de fotos órfãs ----------------------- */
+
+// Junta todos os endereços de foto citados num conteúdo.
+function enderecosDeFotos(conteudo) {
+  if (!conteudo) return new Set();
+
+  const itens = [
+    ...(Array.isArray(conteudo.products) ? conteudo.products : []),
+    ...(Array.isArray(conteudo.promos) ? conteudo.promos : [])
+  ];
+
+  const enderecos = new Set();
+
+  for (const item of itens) {
+    const fotos = Array.isArray(item.images) ? item.images : [];
+
+    for (const foto of fotos) {
+      if (typeof foto === 'string') {
+        enderecos.add(foto);
+      } else if (foto && typeof foto === 'object') {
+        if (foto.url) enderecos.add(foto.url);
+        if (foto.thumb) enderecos.add(foto.thumb);
+      }
+    }
+  }
+
+  return enderecos;
+}
+
+// Só apagamos arquivos que nós mesmos enviamos. As imagens que vieram junto
+// com o repositório (./algo.jpg) e endereços externos ficam intocados.
+function podeApagar(endereco) {
+  if (blobConfigurado()) return endereco.includes('.public.blob.vercel-storage.com/');
+  return endereco.startsWith('/uploads/');
+}
+
+/* Compara o conteúdo antigo com o novo e apaga as fotos que deixaram de ser
+   citadas. É best-effort: se a remoção falhar, o conteúdo já foi salvo e o
+   pior que acontece é sobrar um arquivo ocupando espaço. */
+export async function removeFotosOrfas(conteudoAnterior, conteudoNovo) {
+  const antes = enderecosDeFotos(conteudoAnterior);
+  if (antes.size === 0) return { removidas: 0 };
+
+  const depois = enderecosDeFotos(conteudoNovo);
+  const orfas = [...antes].filter(url => !depois.has(url) && podeApagar(url));
+
+  if (orfas.length === 0) return { removidas: 0 };
+
+  try {
+    if (blobConfigurado()) {
+      const { del } = await import('@vercel/blob');
+      await del(orfas);
+    } else {
+      await Promise.all(orfas.map(async url => {
+        const arquivo = path.join(PASTA_UPLOADS, path.basename(url));
+        await fs.rm(arquivo, { force: true });
+      }));
+    }
+
+    return { removidas: orfas.length };
+  } catch (err) {
+    console.error('Não foi possível remover fotos órfãs:', err.message);
+    return { removidas: 0, erro: err.message };
+  }
+}

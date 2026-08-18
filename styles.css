@@ -1710,6 +1710,67 @@ body.admin-active {
 
 .card-badge-photos i { width: 13px; height: 13px; }
 
+/* Selo de destaque, escolhido pela administradora */
+.card-badge-destaque {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: linear-gradient(135deg, #f6c445, #e8a020);
+  color: #4a3200;
+  font-size: 0.74rem;
+  font-weight: 800;
+  padding: 4px 11px;
+  border-radius: var(--radius-pill);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+  z-index: 2;
+}
+
+.card-badge-destaque i { width: 13px; height: 13px; }
+
+/* Setas de ordenação e estrela, sobrepostas à foto no modo admin */
+.admin-order-controls {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  z-index: 3;
+}
+
+.btn-order {
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.94);
+  color: var(--text-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition-fast);
+}
+
+.btn-order:hover:not(:disabled) { background: #fff; transform: scale(1.08); }
+
+.btn-order:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.btn-order.is-on {
+  background: linear-gradient(135deg, #f6c445, #e8a020);
+  color: #4a3200;
+}
+
+.btn-order i { width: 15px; height: 15px; }
+
 .promo-img-box { cursor: zoom-in; }
 
 /* Faixa com todas as fotos do produto/oferta, visível no próprio card */

@@ -453,6 +453,67 @@ function activeCardPhotoIndex(event) {
   return Array.from(active.parentElement.children).indexOf(active);
 }
 
+/* --------- ordem dos produtos e destaque (só no modo admin) --------- */
+
+// Setas de mover e estrela de destaque, sobre a foto do card.
+function renderOrderControls(produto, listaVisivel) {
+  const posicao = listaVisivel.findIndex(p => p.id === produto.id);
+  const primeiro = posicao === 0;
+  const ultimo = posicao === listaVisivel.length - 1;
+
+  return `
+    <div class="admin-order-controls" onclick="event.stopPropagation()">
+      <button class="btn-order" onclick="moveProduct('${escapeAttr(produto.id)}', -1)" ${primeiro ? 'disabled' : ''} title="Mover para antes">
+        <i data-lucide="arrow-up"></i>
+      </button>
+      <button class="btn-order" onclick="moveProduct('${escapeAttr(produto.id)}', 1)" ${ultimo ? 'disabled' : ''} title="Mover para depois">
+        <i data-lucide="arrow-down"></i>
+      </button>
+      <button class="btn-order ${produto.destaque ? 'is-on' : ''}" onclick="toggleDestaque('${escapeAttr(produto.id)}')" title="${produto.destaque ? 'Tirar o destaque' : 'Marcar como destaque'}">
+        <i data-lucide="star"></i>
+      </button>
+    </div>
+  `;
+}
+
+// Troca o produto de lugar com o vizinho que aparece na tela. Trabalhamos
+// com a lista visível para que a seta faça o que a Gabriela está vendo,
+// mesmo quando há um filtro de categoria ativo.
+async function moveProduct(produtoId, direcao) {
+  const visiveis = currentFilter === 'all'
+    ? products
+    : products.filter(p => p.category === currentFilter);
+
+  const posicao = visiveis.findIndex(p => p.id === produtoId);
+  const vizinho = visiveis[posicao + direcao];
+  if (posicao === -1 || !vizinho) return;
+
+  const de = products.findIndex(p => p.id === produtoId);
+  const para = products.findIndex(p => p.id === vizinho.id);
+  if (de === -1 || para === -1) return;
+
+  const backup = JSON.stringify(products);
+  [products[de], products[para]] = [products[para], products[de]];
+
+  if (await persist('Ordem atualizada.')) renderApp();
+  else products = JSON.parse(backup);
+}
+
+async function toggleDestaque(produtoId) {
+  const produto = products.find(p => p.id === produtoId);
+  if (!produto) return;
+
+  const anterior = produto.destaque;
+  produto.destaque = !anterior;
+
+  const mensagem = produto.destaque
+    ? 'Produto marcado como destaque.'
+    : 'Destaque removido.';
+
+  if (await persist(mensagem)) renderApp();
+  else produto.destaque = anterior;
+}
+
 function discountPercent(item) {
   const original = parseFloat(item.originalPrice);
   const promo = parseFloat(item.promoPrice);
@@ -558,6 +619,8 @@ function renderPortfolioGrid() {
           ${discountBadge}
           <span class="card-badge-cat">${escapeHtml(catName)}</span>
           ${photoCount > 1 ? `<span class="card-badge-photos"><i data-lucide="images"></i> ${photoCount}</span>` : ''}
+          ${p.destaque ? `<span class="card-badge-destaque"><i data-lucide="star"></i> Destaque</span>` : ''}
+          ${isAdminMode ? renderOrderControls(p, filteredProducts) : ''}
           <div class="portfolio-card-overlay">
             <button class="zoom-btn" onclick="openProductLightbox('${escapeAttr(p.id)}', event)">
               <i data-lucide="zoom-in"></i> Ver Detalhes
@@ -1067,7 +1130,9 @@ async function saveProductForm(event) {
 
   if (editId) {
     const index = products.findIndex(p => p.id === editId);
-    if (index !== -1) products[index] = { id: editId, ...payload };
+    // Espalha o produto atual antes: preserva campos que o formulário não
+    // edita, como o destaque.
+    if (index !== -1) products[index] = { ...products[index], ...payload };
   } else {
     products.push({ id: 'p_' + Date.now(), ...payload });
   }
@@ -1334,7 +1399,7 @@ async function savePromoItemForm(event) {
 
   if (editId) {
     const index = promos.findIndex(pr => pr.id === editId);
-    if (index !== -1) promos[index] = { id: editId, ...payload };
+    if (index !== -1) promos[index] = { ...promos[index], ...payload };
   } else {
     promos.push({ id: 'promo_' + Date.now(), ...payload });
   }
@@ -1363,8 +1428,80 @@ async function deletePromoItem(promoId) {
 /* --------------------------------------------------------------------------
    9. CONFIGURAÇÕES DA CAMPANHA
    -------------------------------------------------------------------------- */
+/* Modelos de campanha: textos prontos para as datas do ano, para ela não
+   precisar escrever tudo de novo a cada temporada. */
+let modelosCampanha = null;
+
+async function carregaModelosCampanha() {
+  if (modelosCampanha) return modelosCampanha;
+
+  try {
+    const resposta = await fetch('./campanhas.json', { cache: 'no-store' });
+    modelosCampanha = resposta.ok ? await resposta.json() : [];
+  } catch (err) {
+    console.warn('Não foi possível ler os modelos de campanha.', err);
+    modelosCampanha = [];
+  }
+
+  return modelosCampanha;
+}
+
+async function preencheSelectDeModelos() {
+  const select = document.getElementById('ps-modelo');
+  if (!select) return;
+
+  const modelos = await carregaModelosCampanha();
+
+  select.innerHTML = `<option value="">Escolha uma data comemorativa...</option>`
+    + modelos.map(m => `<option value="${escapeAttr(m.id)}">${escapeHtml(m.nome)}</option>`).join('');
+}
+
+async function aplicaModeloCampanha() {
+  const select = document.getElementById('ps-modelo');
+  const modelos = await carregaModelosCampanha();
+  const modelo = modelos.find(m => m.id === select.value);
+
+  if (!modelo) {
+    alert('Escolha um modelo na lista antes de clicar em Usar.');
+    return;
+  }
+
+  const s = modelo.settings;
+
+  document.getElementById('ps-badge').value = s.badge || '';
+  document.getElementById('ps-title').value = s.title || '';
+  document.getElementById('ps-emoji').value = s.emoji || '';
+  document.getElementById('ps-subtitle').value = s.subtitle || '';
+  document.getElementById('ps-countdown-on').checked = !!s.countdownEnabled;
+  document.getElementById('ps-countdown-title').value = s.countdownTitle || '';
+  document.getElementById('ps-cta').value = s.ctaText || '';
+  document.getElementById('ps-section-on').checked = s.enabled !== false;
+
+  // O prazo do contador é sempre escolhido por ela: cada ano tem uma data.
+  if (!s.countdownEnabled) document.getElementById('ps-deadline').value = '';
+
+  // Alguns modelos trazem ofertas sugeridas; trocá-las é destrutivo.
+  if (Array.isArray(modelo.ofertas) && modelo.ofertas.length > 0) {
+    const trocar = confirm(
+      `O modelo "${modelo.nome}" vem com ${modelo.ofertas.length} ofertas sugeridas.\n\n` +
+      `Quer substituir as ${promos.length} ofertas atuais por elas?\n\n` +
+      `OK = trocar as ofertas (as fotos das atuais serão apagadas)\n` +
+      `Cancelar = trocar só os textos da campanha, mantendo suas ofertas`
+    );
+
+    if (trocar) {
+      promos = modelo.ofertas.map(normalizeItem);
+      showToast('Ofertas do modelo carregadas. Revise os preços antes de salvar!');
+    }
+  }
+
+  showToast('Modelo aplicado. Confira os textos e clique em Salvar Campanha.');
+}
+
 function openPromoSettingsModal() {
   const modal = document.getElementById('promo-settings-modal');
+
+  preencheSelectDeModelos();
 
   document.getElementById('ps-badge').value = promoSettings.badge || '';
   document.getElementById('ps-title').value = promoSettings.title || '';

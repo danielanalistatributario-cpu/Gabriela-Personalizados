@@ -1,6 +1,6 @@
 import { readJsonBody, sendJson, sendError, methodNotAllowed, HttpError } from './_lib/http.js';
 import { exigeAdmin } from './_lib/auth.js';
-import { leConteudo, gravaConteudo, modoArmazenamento } from './_lib/store.js';
+import { leConteudo, gravaConteudo, modoArmazenamento, removeFotosOrfas } from './_lib/store.js';
 
 // Só estes campos são aceitos: evita que qualquer coisa seja gravada no banco.
 const CAMPOS = ['categories', 'products', 'promos', 'promoSettings'];
@@ -41,11 +41,18 @@ export default async function handler(req, res) {
       exigeAdmin(req);
 
       const corpo = await readJsonBody(req);
-      const documento = await gravaConteudo(validaConteudo(corpo));
+      const novo = validaConteudo(corpo);
+
+      // Lido antes de gravar, para saber quais fotos deixaram de ser usadas.
+      const anterior = await leConteudo();
+      const documento = await gravaConteudo(novo);
+
+      const limpeza = await removeFotosOrfas(anterior, novo);
 
       return sendJson(res, 200, {
         ok: true,
-        atualizadoEm: documento.atualizadoEm
+        atualizadoEm: documento.atualizadoEm,
+        fotosRemovidas: limpeza.removidas
       });
     }
 

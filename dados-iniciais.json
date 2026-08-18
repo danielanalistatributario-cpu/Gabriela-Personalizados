@@ -119,55 +119,55 @@
   ],
   "promos": [
     {
-      "id": "promo1",
-      "title": "Caixa Bombom + Camisa Corinthians",
-      "description": "Camisa personalizada de time, bombons e foto polaroid com prendedor. \"Para o melhor Pai do Mundo!\"",
-      "originalPrice": 100,
-      "promoPrice": 85,
-      "tag": "",
-      "buttonText": "Encomendar Kit",
-      "images": ["./1c252cc3-73b2-40f5-9c10-cbe7392c274a.jpg"]
+      "id": "corp1",
+      "title": "Kit Boas-Vindas para Novos Funcionários",
+      "description": "Caneca, squeeze e chaveiro com a logo da empresa, em embalagem de presente. Ideal para receber quem está chegando ao time.",
+      "originalPrice": 105,
+      "promoPrice": 89,
+      "tag": "Mais pedido",
+      "buttonText": "Pedir Orçamento",
+      "images": ["./877f987d-483a-48b5-bcd5-ae1cf92ffe30.jpg"]
     },
     {
-      "id": "promo2",
-      "title": "Caixa Bombom + Camisa Fluminense",
-      "description": "Arte sob medida com o time do coração dele, foto afetuosa e embalagem decorada de presente.",
-      "originalPrice": 100,
-      "promoPrice": 85,
-      "tag": "",
-      "buttonText": "Encomendar Kit",
-      "images": ["./7f6d1b45-8e12-4a0b-a0aa-ae7f90a7bde8.jpg"]
+      "id": "corp2",
+      "title": "Brindes para Eventos, Feiras e Congressos",
+      "description": "Chaveiros, imãs e canecas com sua marca para distribuir em estandes e palestras. Quanto maior a quantidade, menor o valor por peça.",
+      "originalPrice": 18,
+      "promoPrice": 12,
+      "tag": "A partir de",
+      "buttonText": "Pedir Orçamento",
+      "images": ["./b2ef4f25-f591-40f5-b8bd-c374cbdd6539.jpg"]
     },
     {
-      "id": "promo3",
-      "title": "Caixa Bombom + Camisa São Paulo",
-      "description": "Combine o amor pelo futebol e pelo pai em uma lembrança doce, elegante e cheia de carinho.",
-      "originalPrice": 100,
-      "promoPrice": 85,
+      "id": "corp3",
+      "title": "Canecas Corporativas com Logo",
+      "description": "Cerâmica premium com a identidade visual da empresa. Ótimas para o dia a dia do escritório e para presentear clientes.",
+      "originalPrice": 45,
+      "promoPrice": 38,
       "tag": "",
-      "buttonText": "Encomendar Kit",
-      "images": ["./e9ea658e-fc1d-461f-a04c-41ec6b4b6d27.jpg"]
+      "buttonText": "Pedir Orçamento",
+      "images": ["./eaa8ee4a-aaa3-4b8b-b562-9c7d9c4923d2.jpg"]
     },
     {
-      "id": "promo4",
-      "title": "Boné Personalizado \"DAD EST 2025\"",
-      "description": "Bordado ou estampa de altíssima definição. Estilo moderno e emocionante para novos pais e avós!",
-      "originalPrice": 60,
-      "promoPrice": 49.9,
-      "tag": "Lançamento",
-      "buttonText": "Encomendar Boné",
-      "images": ["./Boné.jpg"]
+      "id": "corp4",
+      "title": "Presentes de Fim de Ano para Clientes",
+      "description": "Azulejos, relógios e kits personalizados para agradecer parceiros e clientes. Planeje com antecedência e garanta a produção.",
+      "originalPrice": 78,
+      "promoPrice": 65,
+      "tag": "",
+      "buttonText": "Pedir Orçamento",
+      "images": ["./b750b56e-0cb0-400e-bfee-9e06ef36b0e9.jpg"]
     }
   ],
   "promoSettings": {
     "enabled": true,
-    "badge": "👔 Especial Dia dos Pais — Edição Limitada",
-    "title": "Surpreenda o Seu Herói com um Presente Inesquecível",
-    "emoji": "👨‍👧‍👦",
-    "subtitle": "Caixas personalizadas do time do coração com bombons Ferrero Rocher + Bonés exclusivos e relógios afetivos. Faça seu pedido antecipado!",
-    "countdownEnabled": true,
-    "countdownTitle": "Corra! Encomendas antecipadas com condições especiais encerram em:",
+    "badge": "🏢 Personalizados Corporativos — Peça para sua Empresa",
+    "title": "Sua Marca em Presentes que as Pessoas Guardam",
+    "emoji": "🎁",
+    "subtitle": "Brindes, kits de boas-vindas e lembranças de evento com a identidade da sua empresa. Atendemos pedidos por quantidade, com arte aprovada antes da produção e orçamento sob medida.",
+    "countdownEnabled": false,
+    "countdownTitle": "",
     "deadline": "",
-    "ctaText": "Solicitar Orçamento Personalizado para o Dia dos Pais"
+    "ctaText": "Solicitar Orçamento para Minha Empresa"
   }
 }
